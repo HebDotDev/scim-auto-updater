@@ -8,6 +8,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import chrome
 from selenium.webdriver import firefox
 from selenium.webdriver import edge
+import msvcrt
+from msvcrt import getch
+import sys
+import threading
+from threading import Timer
+
+
+
 
 
 
@@ -23,6 +31,14 @@ global update_timer
 update_timer = 300
 
 #functions
+
+def listen_for_exit():
+    while True:
+        user_input = input()
+        if user_input.lower() == 'exit' or user_input.lower() == 'e' or user_input.lower() == 'quit' or user_input.lower() == 'q':
+            print("Exiting program...")
+            #driver.quit()
+            os._exit(0)
 
 def open_ia_in_browser(browser_pref = "firefox"):
     match browser_pref:
@@ -78,14 +94,14 @@ def manage_consent_option(driver : webdriver):
 def manage_patreon_modal(driver : webdriver):
     modal = driver.find_element(By.XPATH, './/div[@class = "modal fade show"]')
     closing_modal = modal.find_element(By.XPATH, './/button[@class = "close"]')
-    print(modal.text)
-    print(closing_modal.text)
+    #(modal.text)
+    #print(closing_modal.text)
     closing_modal.click()
 
 def manage_cookie_banner(driver : webdriver):
     banner = driver.find_element(By.XPATH,'.//div[@class = "cc-window cc-banner cc-type-info cc-theme-block cc-bottom cc-color-override-688238583"]')
     banner_bt = banner.find_element(By.XPATH, './/a[@class = "cc-btn cc-dismiss"]')
-    print(banner_bt.text)
+    #print(banner_bt.text)
     banner_bt.click()
 
 def update_update_time():
@@ -100,7 +116,7 @@ def update_savefile(driver : webdriver):
     file_input = driver.find_element(By.CSS_SELECTOR, "input[type='file']")
     file_input.send_keys(savefile_url)
 
-    print("updated savefile")
+    print("\nupdated savefile")
 
 
 def open_map_on_start(driver :webdriver):
@@ -144,15 +160,13 @@ def update_config():
 
 def main():
 
-
-
     config = configparser.ConfigParser()
     config.sections()
 
     if exists(".//config.ini"):
         print("Config file found.")
         config.read(".//config.ini")
-        print(config)
+        #print(config)
 
     else:
         print("config file missing!")
@@ -165,17 +179,19 @@ def main():
 
     current_driver = open_ia_in_browser()
 
+    input_thread = threading.Thread(target=listen_for_exit)
+    input_thread.daemon = True
+    input_thread.start()
+
     open_map_on_start(current_driver)
 
     while(True):
 
+        print("type exit or e to quit the programm")
         update_savefile(current_driver)
-        time.sleep(600)
+        time.sleep(20)
+
     
-
-
-    current_driver.quit()
-
 
 if __name__ == '__main__':
     main()

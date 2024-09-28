@@ -1,0 +1,17 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.o
+*.so
+
+# Config files #
+################
+*.ini
+
+
+
+# Logs and databases #
+######################
+*.log
