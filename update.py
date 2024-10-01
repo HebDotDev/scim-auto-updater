@@ -14,6 +14,8 @@ import sys
 import threading
 from threading import Timer
 
+from pathlib import Path
+
 
 
 
@@ -117,12 +119,19 @@ def update_update_time():
 
 def update_savefile(driver : webdriver):
     savefolder = identify_savefolder()
-    savefile_url = savefolder + '\\' + os.listdir(savefolder)[-1]
 
+
+    os.chdir(savefolder)
+    files = filter(os.path.isfile, os.listdir(savefolder))
+    files = [os.path.join(savefolder, f) for f in files] # add path to each file
+    files.sort(key=lambda x: os.path.getmtime(x))
+
+
+    print("Loading: ",files[-1])
 
 
     file_input = driver.find_element(By.CSS_SELECTOR, "input[type='file']")
-    file_input.send_keys(savefile_url)
+    file_input.send_keys(files[-1])
 
     print("\nupdated savefile")
 
@@ -130,9 +139,15 @@ def update_savefile(driver : webdriver):
 def open_map_on_start(driver :webdriver):
     
     savefolder = identify_savefolder()
-    savefile_url = savefolder + '\\' + os.listdir(savefolder)[-1]
+    os.chdir(savefolder)
+    files = filter(os.path.isfile, os.listdir(savefolder))
+    files = [os.path.join(savefolder, f) for f in files] # add path to each file
+    files.sort(key=lambda x: os.path.getmtime(x))
+
+
+    print("loading: ",files[-1])
     file_input = driver.find_element(By.CSS_SELECTOR, "input[type='file']")
-    file_input.send_keys(savefile_url)
+    file_input.send_keys(files[-1])
 
 def identify_savefolder():
 
