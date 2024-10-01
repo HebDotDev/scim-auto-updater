@@ -32,7 +32,7 @@ update_timer = 300
 
 #functions
 
-def listen_for_exit():
+def input_listener():
     while True:
         user_input = input()
         if user_input.lower() == 'exit' or user_input.lower() == 'e' or user_input.lower() == 'quit' or user_input.lower() == 'q':
@@ -40,6 +40,18 @@ def listen_for_exit():
             print("You can close this window now")
             #driver.quit()
             os._exit(0)
+        elif user_input.lower() == 'settings' or user_input.lower() == 'setting':
+            print("entering settings menu")
+            
+            config = read_config()
+            print(config.sections())
+            
+            print("Current Settings :\n",config.__str__())
+            print({section: dict(config[section]) for section in config.sections()})
+        else:
+            print("that is not a valid command, try -help or -h to get some help / see the available commands")
+
+
 
 def open_ia_in_browser(browser_pref = "firefox"):
     match browser_pref:
@@ -221,9 +233,12 @@ def main():
 
     current_driver = open_ia_in_browser(browser_pref=browser_pref)
 
-    input_thread = threading.Thread(target=listen_for_exit)
-    input_thread.daemon = True
-    input_thread.start()
+    listener_thread = threading.Thread(target=input_listener)
+    listener_thread.daemon = True
+    listener_thread.start()
+
+
+
 
     open_map_on_start(current_driver)
 
