@@ -37,6 +37,7 @@ def listen_for_exit():
         user_input = input()
         if user_input.lower() == 'exit' or user_input.lower() == 'e' or user_input.lower() == 'quit' or user_input.lower() == 'q':
             print("Exiting program...")
+            print("You can close this window now")
             #driver.quit()
             os._exit(0)
 
@@ -51,12 +52,13 @@ def open_ia_in_browser(browser_pref = "firefox"):
         case _:
             print("oh, there is somethin wrong with the chosen Browser")
             return
-    
+        
+    driver.set_window_size(1024, 600)
+    driver.maximize_window()
     driver.implicitly_wait(2)
     driver.get(scim_url)
 
     #driver.maximize_window()
-
     time.sleep(1)
     
     manage_consent_option(driver)
@@ -66,12 +68,6 @@ def open_ia_in_browser(browser_pref = "firefox"):
     time.sleep(1)
 
     #toggle_fullscreen_option(driver)
-
-
-    
-
-
-
 
     return driver
 
@@ -122,9 +118,7 @@ def update_savefile(driver : webdriver):
 def open_map_on_start(driver :webdriver):
     
     savefolder = identify_savefolder()
-
     savefile_url = savefolder + '\\' + os.listdir(savefolder)[-1]
-
     file_input = driver.find_element(By.CSS_SELECTOR, "input[type='file']")
     file_input.send_keys(savefile_url)
 
@@ -139,21 +133,66 @@ def identify_savefolder():
 def init_config():
     config = configparser.ConfigParser()
 
+    setup_undone = True
+
+    ToggleFullscreenMap_done = False
+    CustomSavesPATH_done = False
+    BrowserPref_done = False
+    Auto_Save_update_timer_done = False
+
+    while(setup_undone):
+
+        if not ToggleFullscreenMap_done:
+            ToggleFullscreenMap = input("Should the Map be opened on Fullscreen on start ? Type True or False\t")
+            if ToggleFullscreenMap == 'False' or ToggleFullscreenMap == 'True':
+                ToggleFullscreenMap_done = True
+
+        if not CustomSavesPATH_done:
+            CustomSavesPATH = input("Do you want to use a custom saves Folder ? Type True or False\t")
+            if CustomSavesPATH == 'False' or CustomSavesPATH == 'True':
+                CustomSavesPATH_done = True
+
+        if not BrowserPref_done:
+            BrowserPref = input("In which Browser should i open the interactive map? Choices are firefox, chrome and edge(least stable)\t").lower()
+            if BrowserPref == 'firefox' or BrowserPref == 'chrome' or BrowserPref == 'edge':
+                BrowserPref_done = True
+        
+        if not Auto_Save_update_timer_done:
+            Auto_Save_update_timer = input("How often should i update the save file to the map ? (is only effektive when you press save or have a new autosafe file) answer in Minutes\t")
+            if Auto_Save_update_timer.isdigit():
+                Auto_Save_update_timer_done = True
+                Auto_Save_update_timer = int(Auto_Save_update_timer) * 60
+        
+        
+
+        if ToggleFullscreenMap_done and CustomSavesPATH_done and BrowserPref_done and Auto_Save_update_timer_done:
+            setup_undone = False
+        else:
+            print("Oh, it seems like there was something wrong with some of your answers, please re-answer these Questions. Take a close look at what is expected")
+
+
+
+
     config['DEFAULT'] = {
-        'ToggleFullscreenMap': False,
-        'CustomSavesPATH': False,
-        'BrowserPref' : 'firefox',
-        'Auto Save update timer': 300,
+        'ToggleFullscreenMap': ToggleFullscreenMap,
+        'CustomSavesPATH': CustomSavesPATH,
+        'BrowserPref' : BrowserPref,
+        'Auto Save update timer': Auto_Save_update_timer,
     }
 
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
 
 def read_config():
-    pass
+    config = configparser.ConfigParser()
+    config.sections()
+    config.read(".//config.ini")
 
-def update_config():
-    pass
+    return config
+
+def update_config(config : configparser):
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
 
 
 # MAIN
@@ -176,8 +215,11 @@ def main():
 
     config.read(".//config.ini")
 
+    update_timer = int(config.get('DEFAULT','Auto Save update timer'))
+    browser_pref = config.get('DEFAULT','browserpref')
 
-    current_driver = open_ia_in_browser()
+
+    current_driver = open_ia_in_browser(browser_pref=browser_pref)
 
     input_thread = threading.Thread(target=listen_for_exit)
     input_thread.daemon = True
@@ -189,7 +231,7 @@ def main():
 
         print("type exit or e to quit the programm")
         update_savefile(current_driver)
-        time.sleep(20)
+        time.sleep(update_timer)
 
     
 
