@@ -40,7 +40,7 @@ def input_listener():
         if user_input.lower() == 'exit' or user_input.lower() == 'e' or user_input.lower() == 'quit' or user_input.lower() == 'q':
             print("Exiting program...")
             print("You can close this window now")
-            #driver.quit()
+
             os._exit(0)
         elif user_input.lower() == 'settings' or user_input.lower() == 'setting':
             print("entering settings menu")
@@ -73,10 +73,10 @@ def open_ia_in_browser(browser_pref = "firefox"):
     driver.get(scim_url)
     
     manage_consent_option(driver)
-    time.sleep(1)
+    #time.sleep(1)
     manage_patreon_modal(driver)
     #manage_cookie_banner(driver)
-    time.sleep(1)
+    #time.sleep(1)
 
     cfg = read_config()
 
@@ -93,8 +93,6 @@ def toggle_fullscreen_option(driver : webdriver):
 
 def manage_consent_option(driver : webdriver):
 
-
-
     manage_bt = driver.find_element(By.XPATH,'.//button[@class = "fc-button fc-cta-manage-options fc-secondary-button"]')
     manage_bt.click()
     confirm_choice_bt = driver.find_element(By.XPATH, '//button[@class = "fc-button fc-confirm-choices fc-primary-button"]')
@@ -102,6 +100,7 @@ def manage_consent_option(driver : webdriver):
     
 
 def manage_patreon_modal(driver : webdriver):
+
     modal = driver.find_element(By.XPATH, './/div[@class = "modal fade show"]')
     closing_modal = modal.find_element(By.XPATH, './/button[@class = "close"]')
     closing_modal.click()
@@ -117,20 +116,13 @@ def update_update_time():
 
 def update_savefile(driver : webdriver):
     savefolder = identify_savefolder()
-
-
     os.chdir(savefolder)
     files = filter(os.path.isfile, os.listdir(savefolder))
     files = [os.path.join(savefolder, f) for f in files] # add path to each file
     files.sort(key=lambda x: os.path.getmtime(x))
-
-
     print("Loading: ",files[-1])
-
-
     file_input = driver.find_element(By.CSS_SELECTOR, "input[type='file']")
     file_input.send_keys(files[-1])
-
     print("\nupdated savefile")
 
 
@@ -141,8 +133,6 @@ def open_map_on_start(driver :webdriver):
     files = filter(os.path.isfile, os.listdir(savefolder))
     files = [os.path.join(savefolder, f) for f in files] # add path to each file
     files.sort(key=lambda x: os.path.getmtime(x))
-
-
     print("loading: ",files[-1])
     file_input = driver.find_element(By.CSS_SELECTOR, "input[type='file']")
     file_input.send_keys(files[-1])
@@ -151,15 +141,13 @@ def identify_savefolder():
 
     save_game_path = os.getenv('LOCALAPPDATA') + '\FactoryGame\Saved\SaveGames'
     savefolder = save_game_path + '\\' + os.listdir(save_game_path)[0]
-
     return savefolder
 
 
 def init_config():
+
     config = configparser.ConfigParser()
-
     setup_undone = True
-
     ToggleFullscreenMap_done = False
     CustomSavesPATH_done = False
     BrowserPref_done = False
@@ -173,7 +161,6 @@ def init_config():
                 ToggleFullscreenMap_done = True
                 ToggleFullscreenMap = ToggleFullscreenMap.capitalize()
             
-
         if not CustomSavesPATH_done:
             CustomSavesPATH = input("Do you want to use a custom saves Folder ? Type True or False\t").lower()
             if CustomSavesPATH == 'false' or CustomSavesPATH == 'true':
@@ -191,15 +178,10 @@ def init_config():
                 Auto_Save_update_timer_done = True
                 Auto_Save_update_timer = int(Auto_Save_update_timer) * 60
         
-        
-
         if ToggleFullscreenMap_done and CustomSavesPATH_done and BrowserPref_done and Auto_Save_update_timer_done:
             setup_undone = False
         else:
             print("Oh, it seems like there was something wrong with some of your answers, please re-answer these Questions. Take a close look at what is expected")
-
-
-
 
     config['DEFAULT'] = {
         'ToggleFullscreenMap': ToggleFullscreenMap,
@@ -246,15 +228,11 @@ def main():
     update_timer = int(config.get('DEFAULT','Auto Save update timer'))
     browser_pref = config.get('DEFAULT','browserpref')
 
-
     current_driver = open_ia_in_browser(browser_pref=browser_pref)
 
     listener_thread = threading.Thread(target=input_listener)
     listener_thread.daemon = True
     listener_thread.start()
-
-
-
 
     open_map_on_start(current_driver)
 
