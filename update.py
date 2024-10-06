@@ -71,9 +71,6 @@ def open_ia_in_browser(browser_pref = "firefox"):
     driver.maximize_window()
     driver.implicitly_wait(2)
     driver.get(scim_url)
-
-    #driver.maximize_window()
-    time.sleep(1)
     
     manage_consent_option(driver)
     time.sleep(1)
@@ -81,7 +78,10 @@ def open_ia_in_browser(browser_pref = "firefox"):
     #manage_cookie_banner(driver)
     time.sleep(1)
 
-    #toggle_fullscreen_option(driver)
+    cfg = read_config()
+
+    if cfg.get('DEFAULT','togglefullscreenmap') == 'True':
+        toggle_fullscreen_option(driver)
 
     return driver
 
@@ -94,7 +94,7 @@ def toggle_fullscreen_option(driver : webdriver):
 def manage_consent_option(driver : webdriver):
 
 
-    consent_class = driver.find_element(By.XPATH, './/div[@class = "fc-dialog-content"]')
+
     manage_bt = driver.find_element(By.XPATH,'.//button[@class = "fc-button fc-cta-manage-options fc-secondary-button"]')
     manage_bt.click()
     confirm_choice_bt = driver.find_element(By.XPATH, '//button[@class = "fc-button fc-confirm-choices fc-primary-button"]')
@@ -104,18 +104,16 @@ def manage_consent_option(driver : webdriver):
 def manage_patreon_modal(driver : webdriver):
     modal = driver.find_element(By.XPATH, './/div[@class = "modal fade show"]')
     closing_modal = modal.find_element(By.XPATH, './/button[@class = "close"]')
-    #(modal.text)
-    #print(closing_modal.text)
     closing_modal.click()
 
 def manage_cookie_banner(driver : webdriver):
     banner = driver.find_element(By.XPATH,'.//div[@class = "cc-window cc-banner cc-type-info cc-theme-block cc-bottom cc-color-override-688238583"]')
     banner_bt = banner.find_element(By.XPATH, './/a[@class = "cc-btn cc-dismiss"]')
-    #print(banner_bt.text)
     banner_bt.click()
 
 def update_update_time():
     pass
+
 
 def update_savefile(driver : webdriver):
     savefolder = identify_savefolder()
@@ -170,14 +168,17 @@ def init_config():
     while(setup_undone):
 
         if not ToggleFullscreenMap_done:
-            ToggleFullscreenMap = input("Should the Map be opened on Fullscreen on start ? Type True or False\t")
-            if ToggleFullscreenMap == 'False' or ToggleFullscreenMap == 'True':
+            ToggleFullscreenMap = input("Should the Map be opened on Fullscreen on start ? Type True or False\t").lower()
+            if ToggleFullscreenMap == 'false' or ToggleFullscreenMap == 'true':
                 ToggleFullscreenMap_done = True
+                ToggleFullscreenMap = ToggleFullscreenMap.capitalize()
+            
 
         if not CustomSavesPATH_done:
-            CustomSavesPATH = input("Do you want to use a custom saves Folder ? Type True or False\t")
-            if CustomSavesPATH == 'False' or CustomSavesPATH == 'True':
+            CustomSavesPATH = input("Do you want to use a custom saves Folder ? Type True or False\t").lower()
+            if CustomSavesPATH == 'false' or CustomSavesPATH == 'true':
                 CustomSavesPATH_done = True
+                CustomSavesPATH = CustomSavesPATH.capitalize()
 
         if not BrowserPref_done:
             BrowserPref = input("In which Browser should i open the interactive map? Choices are firefox, chrome and edge(least stable)\t").lower()
@@ -185,7 +186,7 @@ def init_config():
                 BrowserPref_done = True
         
         if not Auto_Save_update_timer_done:
-            Auto_Save_update_timer = input("How often should i update the save file to the map ? (is only effektive when you press save or have a new autosafe file) answer in Minutes\t")
+            Auto_Save_update_timer = input("How often should i update the save file to the map ? (usually 5-10) answer in Minutes\t")
             if Auto_Save_update_timer.isdigit():
                 Auto_Save_update_timer_done = True
                 Auto_Save_update_timer = int(Auto_Save_update_timer) * 60
@@ -230,7 +231,7 @@ def main():
     config.sections()
 
     if exists(".//config.ini"):
-        print("Config file found.")
+        #print("Config file found.")
         config.read(".//config.ini")
         #print(config)
 
