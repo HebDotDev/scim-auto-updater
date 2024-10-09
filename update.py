@@ -17,21 +17,6 @@ from threading import Timer
 from pathlib import Path
 
 
-
-
-
-
-
-
-global scim_url
-scim_url = 'https://satisfactory-calculator.com/en/interactive-map'
-
-global satisfactory_savegame_path
-satisfactory_savegame_path = '%LOCALAPPDATA%\FactoryGame\Saved\SaveGames'
-
-global update_timer
-update_timer = 300
-
 #functions
 
 def input_listener():
@@ -56,6 +41,9 @@ def input_listener():
 
 
 def open_ia_in_browser(browser_pref = "firefox"):
+
+    cfg = read_config()
+
     match browser_pref:
         case "firefox":
             driver = webdriver.Firefox()
@@ -66,19 +54,19 @@ def open_ia_in_browser(browser_pref = "firefox"):
         case _:
             print("oh, there is somethin wrong with the chosen Browser")
             return
-        
+
+
     driver.set_window_size(1024, 600)
     driver.maximize_window()
-    driver.implicitly_wait(2)
+    driver.implicitly_wait(10)
+
+    scim_url = cfg.get('DEFAULT','DefaultURL')
     driver.get(scim_url)
     
     manage_consent_option(driver)
-    #time.sleep(1)
     manage_patreon_modal(driver)
-    #manage_cookie_banner(driver)
-    #time.sleep(1)
 
-    cfg = read_config()
+    
 
     if cfg.get('DEFAULT','togglefullscreenmap') == 'True':
         toggle_fullscreen_option(driver)
@@ -184,6 +172,9 @@ def init_config():
             print("Oh, it seems like there was something wrong with some of your answers, please re-answer these Questions. Take a close look at what is expected")
 
     config['DEFAULT'] = {
+        'DefaultURL' : 'https://satisfactory-calculator.com/en/interactive-map',
+        'Default savegame path':"%%LOCALAPPDATA%%\FactoryGame\Saved\SaveGames",
+        'Custom savegame path':"%%LOCALAPPDATA%%\FactoryGame\Saved\SaveGames",
         'ToggleFullscreenMap': ToggleFullscreenMap,
         'CustomSavesPATH': CustomSavesPATH,
         'BrowserPref' : BrowserPref,
@@ -209,13 +200,16 @@ def update_config(config : configparser):
 
 def main():
 
+
+    #global satisfactory_savegame_path
+    #satisfactory_savegame_path = '%LOCALAPPDATA%\FactoryGame\Saved\SaveGames'
+
     config = configparser.ConfigParser()
     config.sections()
 
     if exists(".//config.ini"):
-        #print("Config file found.")
         config.read(".//config.ini")
-        #print(config)
+
 
     else:
         print("config file missing!")
